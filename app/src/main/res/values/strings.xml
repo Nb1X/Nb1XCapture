@@ -1,17 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nb1X Capture</string>
-    <string name="btn_start">Démarrer</string>
-    <string name="btn_stop">Arrêter</string>
-    <string name="btn_list">Voir</string>
-    <string name="btn_delete_last">Suppr. dernier</string>
-    <string name="btn_close">Fermer</string>
-    <string name="notif_channel">Enregistrement écran</string>
+
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop</string>
+    <string name="btn_list">View recordings</string>
+    <string name="btn_delete_last">Delete last</string>
+    <string name="btn_close">Close</string>
+
+    <string name="list_title">Recordings</string>
+    <string name="list_empty">No recordings yet!</string>
+    <string name="list_close">Close</string>
+    <string name="list_open_with">Open with…</string>
+    <string name="list_delete">Delete</string>
+
+    <string name="notif_channel">Screen recording</string>
     <string name="notif_title">Nb1X Capture</string>
-    <string name="notif_text">Enregistrement en cours…</string>
-    <string name="list_title">Enregistrements</string>
-    <string name="list_empty">Aucun enregistrement</string>
-    <string name="list_close">Fermer</string>
-    <string name="notif_finished_title">Enregistrement terminé</string>
-    <string name="notif_finished_fmt">Fichier : %1$s</string>
+    <string name="notif_text">Recording in progress…</string>
+    <string name="notif_channel_finished">Screen recording (finished)</string>
+    <string name="notif_finished_title">Recording finished</string>
+    <string name="notif_finished_fmt">File: %1$s</string>
+
+    <string name="toast_recording_started">Recording started</string>
+    <string name="toast_recording_stopped">Recording stopped</string>
+    <string name="toast_recording_saved">Saved: %1$s</string>
+    <string name="toast_permission_overlay_granted">Overlay permission granted</string>
+    <string name="toast_permission_overlay_denied">Overlay permission denied</string>
+    <string name="toast_permission_overlay_required">Overlay permission required</string>
+    <string name="toast_projection_denied">Screen capture denied</string>
+    <string name="toast_file_deleted">Deleted: %1$s</string>
+    <string name="toast_file_delete_failed">Could not delete file</string>
+    <string name="toast_no_app_for_file">No app can open this file</string>
+    <string name="toast_stop_before_close">Please stop recording before closing.</string>
 </resources>

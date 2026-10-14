@@ -117,7 +117,7 @@ class ScreenRecordService : Service() {
         return START_STICKY
     }
 
-    // --------- Foreground ---------
+    // Foreground service
 
     private fun startForegroundSimple() {
         log("[NB1XCAPTURE] startForegroundSimple")
@@ -151,7 +151,7 @@ class ScreenRecordService : Service() {
             .setOngoing(true)
             .build()
 
-    // --------- Overlay ---------
+    // Overlay
 
     private fun showOverlay() {
         if (overlay?.isShown() == true) return
@@ -167,8 +167,18 @@ class ScreenRecordService : Service() {
                 }
             },
             onClose = {
-                hideOverlay()
-                stopSelf()
+                if (RecorderState.state.value.isRecording) {
+                    Handler(Looper.getMainLooper()).post {
+                        android.widget.Toast.makeText(
+                            this,
+                            getString(R.string.toast_stop_before_close),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    hideOverlay()
+                    stopSelf()
+                }
             }
         ).also { it.show() }
     }
@@ -201,7 +211,7 @@ class ScreenRecordService : Service() {
         popup?.show(files)
     }
 
-    // --------- Enregistrement ---------
+    // Recording
 
     private fun startRecording(resultCode: Int, data: Intent) {
         log("[NB1XCAPTURE] Started recording (init)")
@@ -233,13 +243,13 @@ class ScreenRecordService : Service() {
         width = (width / 16) * 16
         height = (height / 16) * 16
 
-        // --------- Fichier + muxer ---------
+        // File + muxer
         val file = RecordingStorage.newFile(this)
         currentFile = file
         muxer = MediaMuxer(file.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
         log("[NB1XCAPTURE] Muxer: ${file.name}")
 
-        // --------- Vidéo : essayer chaque codec H.264 jusqu'à ce qu'un marche ---------
+        // Video: try each H.264 codec until one works
         val preferred = listOf(
             "c2.android.avc.encoder",
             "OMX.google.h264.encoder"
@@ -309,7 +319,7 @@ class ScreenRecordService : Service() {
         )
         log("[NB1XCAPTURE] VirtualDisplay created")
 
-        // --------- Audio (Android 10+) ---------
+        // Audio (Android 10+)
         var audioStarted = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -323,10 +333,10 @@ class ScreenRecordService : Service() {
             log("[NB1XCAPTURE] Audio capture requires Android 10+")
         }
 
-        // On prévoit 2 pistes si l'audio tourne, 1 sinon
+        // Expect 2 tracks if audio is on, 1 otherwise
         pendingTracks = if (audioStarted) 2 else 1
 
-        // --------- Lancement des threads ---------
+        // Start worker threads
         running = true
         RecorderState.setRecording(true)
         videoDrainThread = Thread { videoDrainLoop() }.also {
@@ -334,6 +344,13 @@ class ScreenRecordService : Service() {
         }
 
         log("[NB1XCAPTURE] Started recording")
+        Handler(Looper.getMainLooper()).post {
+            android.widget.Toast.makeText(
+                this,
+                getString(R.string.toast_recording_started),
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     // --------- Vidéo : drain ---------
@@ -422,12 +439,12 @@ class ScreenRecordService : Service() {
         val record = audioRecord ?: return
 
         while (running) {
-            // 1) Lire PCM depuis AudioRecord
+            // Read PCM from AudioRecord
             pcmBuffer.clear()
             val read = record.read(pcmBuffer, pcmBuffer.capacity())
             if (read <= 0) continue
 
-            // 2) Envoyer à l'encodeur AAC
+            // Feed AAC encoder
             val enc = audioEncoder ?: break
             val inIdx = try { enc.dequeueInputBuffer(10_000) } catch (_: Exception) { -1 }
             if (inIdx >= 0) {
@@ -439,7 +456,7 @@ class ScreenRecordService : Service() {
                 enc.queueInputBuffer(inIdx, 0, read, System.nanoTime() / 1000, 0)
             }
 
-            // 3) Récupérer les buffers encodés
+            // Pull encoded buffers
             var outIdx = try { enc.dequeueOutputBuffer(bufInfo, 0) } catch (_: Exception) { -1 }
             while (outIdx >= 0) {
                 val outBuf = enc.getOutputBuffer(outIdx)
@@ -453,7 +470,7 @@ class ScreenRecordService : Service() {
                 outIdx = try { enc.dequeueOutputBuffer(bufInfo, 0) } catch (_: Exception) { -1 }
             }
 
-            // Cas spécial : format changed
+            // Special case: format changed
             if (outIdx == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 synchronized(muxerLock) {
                     audioTrackIndex = muxer?.addTrack(enc.outputFormat) ?: -1
@@ -467,9 +484,9 @@ class ScreenRecordService : Service() {
     // --------- Muxer partagé ---------
 
     private fun maybeStartMuxer() {
-        // Appelé sous muxerLock, une fois par piste
+        // Called under muxerLock, once per track
         if (muxerStarted) return
-        // On a besoin d'autant de pistes valides que prévu
+        // Need as many valid tracks as expected
         val have = listOf(videoTrackIndex, audioTrackIndex).count { it >= 0 }
         val needed = if (pendingTracks == 2) 2 else 1
         if (have >= needed) {
@@ -500,11 +517,11 @@ class ScreenRecordService : Service() {
         }
         running = false
 
-        // Arrêter les threads
+        // Stop threads
         try { videoDrainThread?.join(500) } catch (_: Exception) {}
         try { audioThread?.join(500) } catch (_: Exception) {}
 
-        // Arrêter l'audio
+        // Stop audio
         try { audioRecord?.stop() } catch (_: Exception) {}
         try { audioRecord?.release() } catch (_: Exception) {}
         audioRecord = null
@@ -513,7 +530,7 @@ class ScreenRecordService : Service() {
         try { audioEncoder?.release() } catch (_: Exception) {}
         audioEncoder = null
 
-        // Arrêter la vidéo
+        // Stop video
         try { virtualDisplay?.release() } catch (_: Exception) {}
         virtualDisplay = null
 
@@ -521,11 +538,11 @@ class ScreenRecordService : Service() {
         try { videoEncoder?.release() } catch (_: Exception) {}
         videoEncoder = null
 
-        // Arrêter la projection
+        // Stop projection
         try { projection?.stop() } catch (_: Exception) {}
         projection = null
 
-        // Fermer le muxer
+        // Close muxer
         synchronized(muxerLock) {
             if (muxerStarted) {
                 try { muxer?.stop() } catch (_: Exception) {}
@@ -543,26 +560,32 @@ class ScreenRecordService : Service() {
         RecorderState.setRecording(false)
         RecorderState.setCount(RecordingStorage.count(this))
         log("[NB1XCAPTURE] Recording stopped")
+        Handler(Looper.getMainLooper()).post {
+            android.widget.Toast.makeText(
+                this,
+                getString(R.string.toast_recording_stopped),
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
 
         val finishedName = currentFile?.name
         currentFile = null
         if (finishedName != null) {
-            showFinishedNotification(finishedName)
+            showFinishedToast(finishedName)
         }
 
         startForegroundSimple()
     }
 
-    private fun showFinishedNotification(fileName: String) {
+    private fun showFinishedToast(fileName: String) {
         log("[NB1XCAPTURE] Finished: $fileName")
-        val notif = NotificationCompat.Builder(this, CHANNEL_FINISHED_ID)
-            .setContentTitle(getString(R.string.notif_finished_title))
-            .setContentText(getString(R.string.notif_finished_fmt, fileName))
-            .setSmallIcon(R.drawable.ic_record)
-            .setAutoCancel(true)
-            .build()
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(NOTIF_FINISHED_ID, notif)
+        Handler(Looper.getMainLooper()).post {
+            android.widget.Toast.makeText(
+                this,
+                getString(R.string.toast_recording_saved, fileName),
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     override fun onDestroy() {

@@ -60,19 +60,19 @@ class OverlayView(
         val bDelete = v.findViewById<ImageButton>(R.id.btnDeleteLast)
         val bClose  = v.findViewById<ImageButton>(R.id.btnClose)
 
-        // --- Clic sur le bouton principal : toggle menu ---
+        // Main button: toggle menu
         btnMain?.setOnClickListener {
             toggleExpand()
         }
 
-        // --- Clics sur les actions ---
+        // Action buttons
         bStart.setOnClickListener  { onStart();  collapse() }
         bStop.setOnClickListener   { onStop();   collapse() }
         bList.setOnClickListener   { onList();   collapse() }
         bDelete.setOnClickListener { onDeleteLast(); collapse() }
-        bClose.setOnClickListener  { onClose() }
+        bClose.setOnClickListener  { onClose() }  // pas de collapse auto
 
-        // --- Drag depuis le bouton principal ---
+        // Drag from main button
         btnMain?.setOnTouchListener(DragTouchListener(params, wm) { rootView })
 
         try {
@@ -83,7 +83,7 @@ class OverlayView(
             return
         }
 
-        // --- Observation de l'état ---
+        // Observe shared state
         val s = CoroutineScope(Dispatchers.Main + Job())
         scope = s
         s.launch {
@@ -95,7 +95,7 @@ class OverlayView(
                 bDelete.isEnabled = st.hasRecordings
                 bDelete.alpha = if (st.hasRecordings) 1f else 0.3f
 
-                // Change l'icône du bouton principal selon l'état
+                // Update main button icon based on state
                 val newIcon = if (st.isRecording) R.drawable.ic_stop else R.drawable.ic_hamburger
                 if (btnMain?.tag != newIcon) {
                     btnMain?.setImageResource(newIcon)
@@ -105,9 +105,6 @@ class OverlayView(
         }
     }
 
-    /**
-     * Réplie/déplie le menu avec une petite animation.
-     */
     private fun toggleExpand() {
         if (expanded) collapse() else expand()
     }
@@ -149,11 +146,7 @@ class OverlayView(
 
     fun isShown(): Boolean = view != null
 
-    /**
-     * Gère le drag sur la fenêtre via le bouton principal.
-     * Si le doigt bouge de plus de 15px, on considère que c'est un drag
-     * et on annule le clic (le toggleExpand ne sera pas appelé).
-     */
+    /** Drag handler: distinguishes click from drag (>15px). */
     private class DragTouchListener(
         private val params: WindowManager.LayoutParams,
         private val wm: WindowManager,

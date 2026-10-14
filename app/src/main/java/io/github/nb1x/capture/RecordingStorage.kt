@@ -7,10 +7,7 @@ import kotlin.random.Random
 
 object RecordingStorage {
 
-    /**
-     * Dossier public : /sdcard/Android/media/io.github.nb1x.capture/
-     * Accessible depuis un gestionnaire de fichiers, contrairement à getExternalFilesDir().
-     */
+    /** Public folder: /sdcard/Android/media/io.github.nb1x.capture/ (visible in file managers). */
     fun dir(context: Context): File {
         val base = File(
             Environment.getExternalStorageDirectory(),
@@ -20,10 +17,7 @@ object RecordingStorage {
         return base
     }
 
-    /**
-     * Génère un nom de fichier à 8 chiffres aléatoires (00000000 à 99999999).
-     * Reboucle tant que le fichier existe déjà.
-     */
+    /** Generate a random 8-digit filename. Retry if it already exists. */
     fun newFile(context: Context): File {
         val d = dir(context)
         var attempts = 0
@@ -34,11 +28,11 @@ object RecordingStorage {
             if (!f.exists()) return f
             attempts++
         }
-        // Fallback improbable (1000 collisions consécutives)
+        // Improbable fallback (1000 consecutive collisions)
         return File(d, "${System.currentTimeMillis()}.mp4")
     }
 
-    /** Liste des fichiers .mp4, triés par date croissante (plus ancien en premier). */
+    /** List .mp4 files sorted by ascending date (oldest first). */
     fun list(context: Context): List<File> {
         return dir(context).listFiles()
             ?.filter { it.extension == "mp4" }
@@ -46,7 +40,7 @@ object RecordingStorage {
             ?: emptyList()
     }
 
-    /** Le plus récent (dernier enregistrement). */
+    /** Most recent recording. */
     fun last(context: Context): File? = list(context).lastOrNull()
 
     fun count(context: Context): Int = list(context).size

@@ -6,7 +6,6 @@
     android:background="@drawable/overlay_bg"
     android:padding="4dp">
 
-    <!-- BOUTON PRINCIPAL (toujours visible) -->
     <ImageButton
         android:id="@+id/btnMain"
         android:layout_width="44dp"
@@ -17,7 +16,6 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_hamburger"/>
 
-    <!-- MENU DÉPLIÉ (caché par défaut) -->
     <LinearLayout
         android:id="@+id/expandedMenu"
         android:layout_width="wrap_content"

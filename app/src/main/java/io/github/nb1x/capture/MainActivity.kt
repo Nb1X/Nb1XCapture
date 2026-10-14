@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -23,17 +22,17 @@ class MainActivity : AppCompatActivity() {
     private val overlayPermLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (canDrawOverlay()) {
-                toast("Permission overlay accordée")
+                toast(getString(R.string.toast_permission_overlay_granted))
                 startOverlayService()
             } else {
-                toast("Permission overlay refusée")
+                toast(getString(R.string.toast_permission_overlay_denied))
             }
         }
 
     private val projectionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
             if (res.resultCode == Activity.RESULT_OK && res.data != null) {
-                Log.d("NB1XCAPTURE", "[NB1XCAPTURE] User accepted projection, sending to service")
+                android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] User accepted projection, sending to service")
                 val svc = Intent(this, ScreenRecordService::class.java).apply {
                     action = ScreenRecordService.ACTION_START
                     putExtra(ScreenRecordService.EXTRA_RESULT_CODE, res.resultCode)
@@ -41,10 +40,9 @@ class MainActivity : AppCompatActivity() {
                 }
                 startForegroundService(svc)
             } else {
-                Log.d("NB1XCAPTURE", "[NB1XCAPTURE] User denied projection")
-                toast("Capture refusée")
+                android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] User denied projection")
+                toast(getString(R.string.toast_projection_denied))
             }
-            // Fermer l'Activity pour revenir à l'écran d'origine
             finish()
         }
 
@@ -53,25 +51,22 @@ class MainActivity : AppCompatActivity() {
         android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] MainActivity created, action=${intent?.action}")
         projectionManager = getSystemService(MediaProjectionManager::class.java)
 
-        // Permission notifications (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
                 .launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        // Vérifier si on a été ouverte pour une demande de projection
         if (intent?.action == ACTION_REQUEST_PROJECTION) {
-            Log.d("NB1XCAPTURE", "[NB1XCAPTURE] Projection requested by overlay")
+            android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] Projection requested by overlay")
             handleProjectionRequest()
             return
         }
 
-        // Sinon, flux normal : démarrer l'overlay
         if (!canDrawOverlay()) {
             requestOverlayPermission()
         } else {
             startOverlayService()
-            finish() // Pas besoin de garder l'Activity affichée
+            finish()
         }
     }
 
@@ -79,18 +74,17 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (intent.action == ACTION_REQUEST_PROJECTION) {
-            Log.d("NB1XCAPTURE", "onNewIntent : projection demandée")
+            android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] onNewIntent: projection requested")
             handleProjectionRequest()
         }
     }
 
     private fun handleProjectionRequest() {
         if (!canDrawOverlay()) {
-            toast("Permission overlay requise")
+            toast(getString(R.string.toast_permission_overlay_required))
             requestOverlayPermission()
             return
         }
-        // Lancer le dialogue de projection système
         projectionLauncher.launch(projectionManager.createScreenCaptureIntent())
     }
 

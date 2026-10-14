@@ -28,7 +28,7 @@ class PopupRecordings(private val context: Context) {
     private var dimView: View? = null
     private var popupView: View? = null
 
-    /** Callback appelé après suppression d'un fichier (pour rafraîchir l'état). */
+    /** Called after a file is deleted (to refresh state). */
     var onFileDeleted: ((File) -> Unit)? = null
 
     fun show(files: List<File>) {
@@ -37,7 +37,7 @@ class PopupRecordings(private val context: Context) {
 
         val inflater = LayoutInflater.from(context)
 
-        // --- Fond assombri ---
+        // Dim background
         val dim = View(context).apply { setBackgroundColor(0xAA000000.toInt()) }
         val dimParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -51,13 +51,13 @@ class PopupRecordings(private val context: Context) {
         try { wm.addView(dim, dimParams) } catch (_: Exception) {}
         dimView = dim
 
-        // --- Taille carrée ---
+        // Square size
         val dm = DisplayMetrics()
         @Suppress("DEPRECATION")
         wm.defaultDisplay.getRealMetrics(dm)
         val side = (minOf(dm.widthPixels, dm.heightPixels) * 0.85f).toInt()
 
-        // --- Popup ---
+        // Popup
         val v = inflater.inflate(R.layout.popup_recordings, null)
         val container = v.findViewById<LinearLayout>(R.id.listContainer)
         val emptyText = v.findViewById<TextView>(R.id.emptyText)
@@ -83,7 +83,7 @@ class PopupRecordings(private val context: Context) {
         }
     }
 
-    /** Construit la liste des lignes avec clic-ouvrir et bouton-supprimer. */
+    /** Build the list rows: click to open, button to delete. */
     private fun buildList(container: LinearLayout, emptyText: TextView, files: List<File>) {
         container.removeAllViews()
         if (files.isEmpty()) {
@@ -100,18 +100,29 @@ class PopupRecordings(private val context: Context) {
 
             name.text = f.name
 
-            // Clic sur la ligne = ouvrir le fichier
+            // Click row = open file
             row.setOnClickListener { openFile(f) }
 
-            // Clic sur la poubelle = supprimer
+            // Click delete = remove file
             del.setOnClickListener {
                 val ok = try { f.delete() } catch (_: Exception) { false }
                 if (ok) {
                     android.util.Log.d("NB1XCAPTURE", "[NB1XCAPTURE] Deleted: ${f.name}")
                     onFileDeleted?.invoke(f)
-                    // Rafraîchir le popup
+                    android.widget.Toast.makeText(
+                        context,
+                        context.getString(R.string.toast_file_deleted, f.name),
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    // Refresh popup
                     val remaining = RecordingStorage.list(context)
                     buildList(container, emptyText, remaining)
+                } else {
+                    android.widget.Toast.makeText(
+                        context,
+                        context.getString(R.string.toast_file_delete_failed),
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -119,7 +130,7 @@ class PopupRecordings(private val context: Context) {
         }
     }
 
-    /** Ouvre le fichier avec un dialogue "Ouvrir avec..." (ACTION_VIEW). */
+    /** Open with system chooser (ACTION_VIEW). */
     private fun openFile(file: File) {
         try {
             val uri: Uri = FileProvider.getUriForFile(
@@ -135,11 +146,16 @@ class PopupRecordings(private val context: Context) {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(Intent.createChooser(intent, "Ouvrir avec…").apply {
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.list_open_with)).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             })
         } catch (e: Exception) {
             android.util.Log.e("NB1XCAPTURE", "[NB1XCAPTURE] open failed", e)
+            android.widget.Toast.makeText(
+                context,
+                context.getString(R.string.toast_no_app_for_file),
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

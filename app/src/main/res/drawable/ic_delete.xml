@@ -2,19 +2,16 @@
     android:width="32dp" android:height="32dp"
     android:viewportWidth="256" android:viewportHeight="256">
 
-    <!-- Couvercle -->
     <path
         android:fillColor="#374151"
         android:pathData="M65,48 H191 A5,5 0 0,1 196,53 V59 A5,5 0 0,1 191,64 H65 A5,5 0 0,1 60,59 V53 A5,5 0 0,1 65,48 Z"/>
 
-    <!-- Poignée -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#374151"
         android:strokeWidth="7"
         android:pathData="M105,48 V39 Q105,33 112,33 H144 Q151,33 151,39 V48"/>
 
-    <!-- Corps de la poubelle -->
     <path
         android:fillColor="#9CA3AF"
         android:strokeColor="#374151"
@@ -22,7 +19,6 @@
         android:strokeLineJoin="round"
         android:pathData="M76,69 H180 L169,207 Q168,217 158,217 H98 Q88,217 87,207 Z"/>
 
-    <!-- Reflet -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#D1D5DB"
@@ -30,7 +26,6 @@
         android:strokeLineCap="round"
         android:pathData="M91,82 L100,201"/>
 
-    <!-- Rainures -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#6B7280"
