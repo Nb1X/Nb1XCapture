@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nb1X Capture</string>
+    <string name="btn_start">Démarrer</string>
+    <string name="btn_stop">Arrêter</string>
+    <string name="btn_list">Voir</string>
+    <string name="btn_delete_last">Suppr. dernier</string>
+    <string name="btn_close">Fermer</string>
+    <string name="notif_channel">Enregistrement écran</string>
+    <string name="notif_title">Nb1X Capture</string>
+    <string name="notif_text">Enregistrement en cours…</string>
+    <string name="list_title">Enregistrements</string>
+    <string name="list_empty">Aucun enregistrement</string>
+    <string name="list_close">Fermer</string>
+    <string name="notif_finished_title">Enregistrement terminé</string>
+    <string name="notif_finished_fmt">Fichier : %1$s</string>
+</resources>

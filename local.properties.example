@@ -1,0 +1,21 @@
+# Example local configuration for Nb1X Capture.
+# Copy this file to "local.properties" and adjust the path to your setup.
+
+# Path to the Android SDK.
+#
+# Examples per platform:
+#
+#   Linux / Raspberry Pi:
+#       sdk.dir=/home/user/Android/Sdk
+#       sdk.dir=$HOME/Android/Sdk
+#
+#   macOS:
+#       sdk.dir=/Users/<your_user>/Library/Android/sdk
+#
+#   Windows (escape the backslashes):
+#       sdk.dir=C\:\\Users\\<your_user>\\AppData\\Local\\Android\\Sdk
+#
+#   Termux:
+#       sdk.dir=/data/data/com.termux/files/home/android-sdk
+#
+sdk.dir=/path/to/your/Android/Sdk

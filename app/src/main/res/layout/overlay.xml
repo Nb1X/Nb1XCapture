@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/overlay_bg"
+    android:padding="4dp">
+
+    <!-- BOUTON PRINCIPAL (toujours visible) -->
+    <ImageButton
+        android:id="@+id/btnMain"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Menu"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_hamburger"/>
+
+    <!-- MENU DÉPLIÉ (caché par défaut) -->
+    <LinearLayout
+        android:id="@+id/expandedMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingTop="4dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33FFFFFF"
+            android:layout_marginBottom="4dp"/>
+
+        <ImageButton
+            android:id="@+id/btnStart"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_start"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_start"/>
+
+        <ImageButton
+            android:id="@+id/btnStop"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_stop"
+            android:enabled="false"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_stop"/>
+
+        <ImageButton
+            android:id="@+id/btnList"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_list"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_list"/>
+
+        <ImageButton
+            android:id="@+id/btnDeleteLast"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_delete_last"
+            android:enabled="false"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_delete"/>
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_close"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_close"/>
+
+    </LinearLayout>
+
+</LinearLayout>
